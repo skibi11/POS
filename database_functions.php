@@ -2,7 +2,7 @@
 $host = 'localhost';
 $username = 'root';
 $password = '';
-$database = 'chickenamorDatabase1'; // Database name provided by you
+$database = 'chickenamorDatabase1'; // Database name
 
 // Function to establish a database connection
 function connectDatabase() {
@@ -16,12 +16,11 @@ function connectDatabase() {
     return $conn;
 }
 
-//1. Function to fetch menu items based on the selected category
-
+// 1. Function to fetch menu items based on the selected category
 function fetchMenuItems($category) {
     $conn = connectDatabase();
 
-    $stmt = $conn->prepare("SELECT ItemID, ItemName, Price, Category, image FROM MenuItem WHERE Category = ?");
+    $stmt = $conn->prepare("SELECT ItemID, ItemName, Price, Category, Image FROM MenuItem WHERE Category = ?");
     $stmt->bind_param('s', $category);
     $stmt->execute();
 
@@ -38,28 +37,28 @@ function fetchMenuItems($category) {
     return $menuItems;
 }
 
-//2. Function to add an order item
-function addOrderItem($orderId, $menuItemId, $quantity) {
+// 2. Function to add an order item
+function addOrderItem($orderID, $menuItemID, $quantity) {
     $conn = connectDatabase();
 
     // Fetch the price of the menu item
-    $menuItem = fetchMenuItemById($menuItemId);
+    $menuItem = fetchMenuItemById($menuItemID);
     $subtotal = $menuItem['Price'] * $quantity;
 
     $stmt = $conn->prepare("INSERT INTO OrderItem (OrderID, MenuItemID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('iiid', $orderId, $menuItemId, $quantity, $subtotal);
+    $stmt->bind_param('iiid', $orderID, $menuItemID, $quantity, $subtotal);
     $stmt->execute();
 
     $stmt->close();
     $conn->close();
 }
 
-//3. Function to fetch a menu item by its ID
-function fetchMenuItemById($menuItemId) {
+// 3. Function to fetch a menu item by its ID
+function fetchMenuItemById($menuItemID) {
     $conn = connectDatabase();
 
     $stmt = $conn->prepare("SELECT * FROM MenuItem WHERE ItemID = ?");
-    $stmt->bind_param('i', $menuItemId);
+    $stmt->bind_param('i', $menuItemID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -71,7 +70,7 @@ function fetchMenuItemById($menuItemId) {
     return $menuItem;
 }
 
-//4. Function to fetch order list items from the database
+// 4. Function to fetch order list items from the database
 function fetchOrderList() {
     $conn = connectDatabase();
 
@@ -89,14 +88,14 @@ function fetchOrderList() {
     return $orderList;
 }
 
-//5. Function to add an item to the order
-function addItemToOrder($itemID) {
+// 5. Function to add an item to the order
+function addItemToOrder($menuItemID) {
     $conn = connectDatabase();
 
     // Check if the item already exists in the order
     $sql = "SELECT * FROM OrderItem WHERE MenuItemID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $itemID);
+    $stmt->bind_param('i', $menuItemID);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -105,16 +104,16 @@ function addItemToOrder($itemID) {
         $orderItem = $result->fetch_assoc();
         $orderItemID = $orderItem['OrderItemID'];
         $currentQuantity = $orderItem['Quantity'];
-        $newQuantity = currentQuantity + 1;
-        updateOrderItemQuantity($orderItemID, newQuantity);
+        $newQuantity = $currentQuantity + 1;
+        updateOrderItemQuantity($orderItemID, $newQuantity);
     } else {
         // Item not in order, add a new order item
         $quantity = 1;
-        $subtotal = getMenuItemPrice($itemID) * quantity;
+        $subtotal = getMenuItemPrice($menuItemID) * $quantity;
 
         $sql = "INSERT INTO OrderItem (MenuItemID, Quantity, Subtotal) VALUES (?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('idi', $itemID, quantity, subtotal);
+        $stmt->bind_param('idi', $menuItemID, $quantity, $subtotal);
         $stmt->execute();
     }
 
@@ -122,33 +121,33 @@ function addItemToOrder($itemID) {
     $conn->close();
 }
 
-//6. Function to update the quantity of an order item
+// 6. Function to update the quantity of an order item
 function updateOrderItemQuantity($orderItemID, $quantity) {
     $conn = connectDatabase();
 
     $sql = "UPDATE OrderItem SET Quantity = ?, Subtotal = Quantity * (SELECT Price FROM MenuItem WHERE ItemID = OrderItem.MenuItemID) WHERE OrderItemID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('ii', quantity, orderItemID);
+    $stmt->bind_param('ii', $quantity, $orderItemID);
     $stmt->execute();
 
     $stmt->close();
     $conn->close();
 }
 
-//7.  Function to remove an order item
+// 7. Function to remove an order item
 function removeOrderItem($orderItemID) {
     $conn = connectDatabase();
 
     $sql = "DELETE FROM OrderItem WHERE OrderItemID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', orderItemID);
+    $stmt->bind_param('i', $orderItemID);
     $stmt->execute();
 
     $stmt->close();
     $conn->close();
 }
 
-//8. Function to fetch order details
+// 8. Function to fetch order details
 function fetchOrderDetails($orderID) {
     $conn = connectDatabase();
 
@@ -166,20 +165,20 @@ function fetchOrderDetails($orderID) {
     return $orderDetails;
 }
 
-//9. Function to confirm the order with serving type and total amount
+// 9. Function to confirm the order with serving type and total amount
 function confirmOrder($orderID, $servingType, $totalAmount) {
     $conn = connectDatabase();
 
     $sql = "UPDATE `Order` SET ServingType = ?, TotalAmount = ?, StatusID = (SELECT StatusID FROM OrderStatus WHERE StatusLabel = 'Confirmed') WHERE OrderID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sdi', servingType, totalAmount, orderID);
+    $stmt=$conn->prepare($sql);
+    $stmt->bind_param('sdi', $servingType, $totalAmount, $orderID);
     $stmt->execute();
 
     $stmt->close();
     $conn->close();
 }
 
-//10. Function to fetch serving type options from the database
+// 10. Function to fetch serving type options from the database
 function fetchServingTypeOptions() {
     $conn = connectDatabase();
 
@@ -197,13 +196,13 @@ function fetchServingTypeOptions() {
     return $servingTypes;
 }
 
-//11. Function to get the price of a menu item by its ID
-function getMenuItemPrice($itemID) {
+// 11. Function to get the price of a menu item by its ID
+function getMenuItemPrice($menuItemID) {
     $conn = connectDatabase();
 
     $sql = "SELECT Price FROM MenuItem WHERE ItemID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', itemID);
+    $stmt->bind_param('i', $menuItemID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -215,26 +214,26 @@ function getMenuItemPrice($itemID) {
     return $price;
 }
 
-//12. Function to update the status of an order
+// 12. Function to update the status of an order
 function updateOrderStatus($orderID, $status) {
     $conn = connectDatabase();
 
     $sql = "UPDATE `Order` SET StatusID = (SELECT StatusID FROM OrderStatus WHERE StatusLabel = ?) WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('si', status, orderID);
+    $stmt->bind_param('si', $status, $orderID);
     $stmt->execute();
 
     $stmt->close();
     $conn->close();
 }
 
-//13. Function to create a new order for a given user ID and serving type
+// 13. Function to create a new order for a given user ID and serving type
 function createNewOrder($userID, $servingType) {
     $conn = connectDatabase();
 
     $sql = "INSERT INTO `Order` (UserID, ServingType, TotalAmount, StatusID) VALUES (?, ?, 0, (SELECT StatusID FROM OrderStatus WHERE StatusLabel = 'Pending'))";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('is', userID, servingType);
+    $stmt->bind_param('is', $userID, $servingType);
     $stmt->execute();
 
     $orderID = $stmt->insert_id;
@@ -242,16 +241,16 @@ function createNewOrder($userID, $servingType) {
     $stmt->close();
     $conn->close();
 
-    return orderID;
+    return $orderID;
 }
 
-//14. Function to fetch the history of changes for a specific order
+// 14. Function to fetch the history of changes for a specific order
 function fetchOrderHistory($orderID) {
     $conn = connectDatabase();
 
     $sql = "SELECT * FROM OrderHistory JOIN OrderStatus ON OrderHistory.StatusID = OrderStatus.StatusID WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', orderID);
+    $stmt->bind_param('i', $orderID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -264,29 +263,29 @@ function fetchOrderHistory($orderID) {
     $stmt->close();
     $conn->close();
 
-    return history;
+    return $history;
 }
 
-//15. Function to add a notification for a specific order
+// 15. Function to add a notification for a specific order
 function addNotification($orderID, $message) {
     $conn = connectDatabase();
 
     $sql = "INSERT INTO Notification (OrderID, Message, NotificationDate, StatusID) VALUES (?, ?, NOW(), (SELECT StatusID FROM OrderStatus WHERE StatusLabel = 'Pending'))";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('is', orderID, message);
+    $stmt->bind_param('is', $orderID, $message);
     $stmt->execute();
 
     $stmt->close();
     $conn->close();
 }
 
-//16. Function to fetch notifications for a specific order
+// 16. Function to fetch notifications for a specific order
 function fetchNotifications($orderID) {
     $conn = connectDatabase();
 
     $sql = "SELECT * FROM Notification WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', orderID);
+    $stmt->bind_param('i', $orderID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -299,16 +298,16 @@ function fetchNotifications($orderID) {
     $stmt->close();
     $conn->close();
 
-    return notifications;
+    return $notifications;
 }
 
-//17. Function to fetch details of a specific user
+// 17. Function to fetch details of a specific user
 function fetchUserDetails($userID) {
     $conn = connectDatabase();
 
     $sql = "SELECT * FROM User WHERE UserID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', userID);
+    $stmt->bind_param('i', $userID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -317,16 +316,16 @@ function fetchUserDetails($userID) {
     $stmt->close();
     $conn->close();
 
-    return userDetails;
+    return $userDetails;
 }
 
-//18. Function to fetch the total amount of a specific order
+// 18. Function to fetch the total amount of a specific order
 function fetchOrderTotalAmount($orderID) {
     $conn = connectDatabase();
 
     $sql = "SELECT TotalAmount FROM `Order` WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', orderID);
+    $stmt->bind_param('i', $orderID);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -338,7 +337,7 @@ function fetchOrderTotalAmount($orderID) {
     return $orderDetails['TotalAmount'];
 }
 
-//19. Function to fetch distinct menu categories from the database
+// 19. Function to fetch distinct menu categories from the database
 function fetchMenuCategories() {
     $conn = connectDatabase();
 
@@ -353,5 +352,5 @@ function fetchMenuCategories() {
     }
 
     $conn->close();
-    return categories;
+    return $categories;
 }
