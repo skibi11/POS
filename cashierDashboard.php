@@ -22,7 +22,7 @@
                 <ul>
                     <li><button id="menu-button" onclick="showMenu()">Menu</button></li>
                     <li><button id="orders-button" onclick="showOrders()">Orders</button></li>
-                    <li><a href="logout.php">Logout</a></li>
+                    <li><button id="logout-button" onclick="showLogout()">Logout</button></li>
                 </ul>
             </nav>
         </div>
