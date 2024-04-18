@@ -2,7 +2,7 @@
 $host = 'localhost';
 $username = 'root';
 $password = '';
-$database = 'chickenamorDatabase1'; // Database name
+$database = 'chickenamordatabase1'; // Database name
 
 // Function to establish a database connection
 function connectDatabase() {
