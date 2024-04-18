@@ -29,16 +29,6 @@
         <!-- Middle Section -->
         <div id="middle-section">
 
-            <!-- Category Bar -->
-            <div id="category-bar">
-                <!-- Hardcoded categories for demonstration; you can populate them dynamically -->
-                <button onclick="fetchMenuItems('ValueMeals')">Value Meals</button>
-                <button onclick="fetchMenuItems('FlavoredWings')">Flavored Wings</button>
-                <button onclick="fetchMenuItems('Desserts')">Desserts</button>
-                <button onclick="fetchMenuItems('Coolers')">Coolers</button>
-                <button onclick="fetchMenuItems('AddOns')">Add-Ons</button>
-            </div>
-
             <!-- Menu Item Cards Grid -->
             <div id="menu-grid">
                 <?php
@@ -46,7 +36,7 @@
                 require_once 'database_functions.php';
 
                 // Default category
-                $defaultCategory = 'ValueMeals'; // Update to match your category names
+                $defaultCategory = 'ValueMeal'; // Update to match your category names
 
                 // Fetch menu items for the default category
                 $menuItems = fetchMenuItems($defaultCategory);
@@ -69,8 +59,16 @@
                 }
                 ?>
             </div>
+            <!-- Category Bar -->
+            <div id="category-bar">
+                <!-- Hardcoded categories for demonstration; you can populate them dynamically -->
+                <button onclick="fetchMenuItems('ValueMeal')">Value Meals</button>
+                <button onclick="fetchMenuItems('FlavoredWings')">Flavored Wings</button>
+                <button onclick="fetchMenuItems('Desserts')">Desserts</button>
+                <button onclick="fetchMenuItems('Coolers')">Coolers</button>
+                <button onclick="fetchMenuItems('AddOns')">Add-Ons</button>
+            </div>
         </div>
-
         <!-- Right Section -->
         <div id="right-section">
             <!-- Order List -->
