@@ -4,7 +4,6 @@
 <head>
     <title>Chickenamor POS</title>
     <link rel="stylesheet" href="cashierDashboard.css"> <!-- Link to CSS file -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
 </head>
 
 <body>
@@ -20,9 +19,9 @@
         <div id="left-sidebar">
             <nav>
                 <ul>
-                    <li><button id="menu-button" onclick="showMenu()">Menu</button></li>
-                    <li><button id="orders-button" onclick="showOrders()">Orders</button></li>
-                    <li><button id="logout-button" onclick="showLogout()">Logout</button></li>
+                    <li><button id="menu-button">Menu</button></li>
+                    <li><button id="orders-button">Orders</button></li>
+                    <li><button id="logout-button">Logout</button></li>
                 </ul>
             </nav>
         </div>
@@ -32,6 +31,7 @@
 
             <!-- Category Bar -->
             <div id="category-bar">
+                <!-- Hardcoded categories for demonstration; you can populate them dynamically -->
                 <button onclick="fetchMenuItems('ValueMeals')">Value Meals</button>
                 <button onclick="fetchMenuItems('FlavoredWings')">Flavored Wings</button>
                 <button onclick="fetchMenuItems('Desserts')">Desserts</button>
@@ -41,7 +41,33 @@
 
             <!-- Menu Item Cards Grid -->
             <div id="menu-grid">
-                <!-- This will be populated dynamically by JavaScript -->
+                <?php
+                // Include the PHP file with your functions
+                require_once 'database_functions.php';
+
+                // Default category
+                $defaultCategory = 'ValueMeals'; // Update to match your category names
+
+                // Fetch menu items for the default category
+                $menuItems = fetchMenuItems($defaultCategory);
+
+                // Loop through the menu items and generate HTML for each card
+                foreach ($menuItems as $item) {
+                    echo '<div class="menu-item-card">';
+                    
+                    // Display image of the item
+                    echo '<img src="' . htmlspecialchars($item['image']) . '" alt="' . htmlspecialchars($item['ItemName']) . '">';
+                    
+                    // Display item details (name and price)
+                    echo '<h3>' . htmlspecialchars($item['ItemName']) . '</h3>';
+                    echo '<p>Price: $' . number_format($item['Price'], 2) . '</p>';
+                    
+                    // Add to Order button
+                    echo '<button onclick="addToOrder(' . htmlspecialchars($item['ItemID']) . ')">Add to Order</button>';
+                    
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
 
@@ -64,205 +90,14 @@
             <!-- Total Order Amount and Confirm Button -->
             <div id="order-summary">
                 <p>Total Order Amount: <span id="total-amount">$0.00</span></p>
-                <button id="confirm-button" onclick="confirmOrder()">Confirm Order</button>
+                <button id="confirm-button">Confirm Order</button>
             </div>
         </div>
 
     </div>
 
     <!-- JavaScript for interactivity -->
-    <script>
-        // Initialize variables to keep track of order items and total amount
-        let orderItems = [];
-        let totalAmount = 0;
-
-        // Function to fetch menu items based on the selected category
-        function fetchMenuItems(category) {
-            $.ajax({
-                url: 'database_functions.php',
-                method: 'POST',
-                data: { category: category },
-                success: function (response) {
-                    const menuItems = JSON.parse(response);
-                    const menuGrid = document.getElementById('menu-grid');
-                    menuGrid.innerHTML = '';
-
-                    menuItems.forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'menu-item-card';
-
-                        const img = document.createElement('img');
-                        img.src = item.image;
-                        img.alt = item.ItemName;
-
-                        const name = document.createElement('h3');
-                        name.textContent = item.ItemName;
-
-                        const price = document.createElement('p');
-                        price.textContent = `Price: $${item.Price.toFixed(2)}`;
-
-                        const button = document.createElement('button');
-                        button.textContent = 'Add to Order';
-                        button.onclick = function() {
-                            addToOrder(item.ItemID);
-                        };
-
-                        card.appendChild(img);
-                        card.appendChild(name);
-                        card.appendChild(price);
-                        card.appendChild(button);
-
-                        menuGrid.appendChild(card);
-                    });
-                }
-            });
-        }
-
-        // Function to add a menu item to the order list
-        function addToOrder(menuItemID) {
-            // Check if the item already exists in the order
-            let orderItem = orderItems.find(item => item.MenuItemID === menuItemID);
-
-            if (orderItem) {
-                // If the item exists, increase the quantity
-                orderItem.Quantity++;
-            } else {
-                // If the item does not exist, add a new item to the order
-                orderItem = {
-                    MenuItemID: menuItemID,
-                    Quantity: 1
-                };
-                orderItems.push(orderItem);
-            }
-
-            updateOrderList();
-        }
-
-        // Function to update the order list and calculate the total amount
-        function updateOrderList() {
-            const orderList = document.getElementById('order-list');
-            orderList.innerHTML = ''; // Clear the existing order list
-
-            totalAmount = 0;
-
-            orderItems.forEach(orderItem => {
-                $.ajax({
-                    url: 'fetch_menu_item.php',
-                    method: 'POST',
-                    data: { ItemID: orderItem.MenuItemID },
-                    async: false,
-                    success: function(response) {
-                        const menuItem = JSON.parse(response);
-                        const orderRow = document.createElement('div');
-                        orderRow.className = 'order-item-row';
-
-                        const name = document.createElement('p');
-                        name.textContent = menuItem.ItemName;
-
-                        const quantity = document.createElement('p');
-                        quantity.textContent = `Quantity: ${orderItem.Quantity}`;
-
-                        // Create plus and minus buttons for updating quantity
-                        const plusButton = document.createElement('button');
-                        plusButton.textContent = '+';
-                        plusButton.onclick = function() {
-                            updateOrderItemQuantity(orderItem.MenuItemID, orderItem.Quantity + 1);
-                        };
-
-                        const minusButton = document.createElement('button');
-                        minusButton.textContent = '-';
-                        minusButton.onclick = function() {
-                            updateOrderItemQuantity(orderItem.MenuItemID, orderItem.Quantity - 1);
-                        };
-
-                        // Create 'x' button for removing order item
-                        const removeButton = document.createElement('button');
-                        removeButton.textContent = 'x';
-                        removeButton.onclick = function() {
-                            removeOrderItem(orderItem.MenuItemID);
-                        };
-
-                        orderRow.appendChild(name);
-                        orderRow.appendChild(quantity);
-                        orderRow.appendChild(plusButton);
-                        orderRow.appendChild(minusButton);
-                        orderRow.appendChild(removeButton);
-
-                        orderList.appendChild(orderRow);
-
-                        // Calculate the subtotal for this order item
-                        const subtotal = menuItem.Price * orderItem.Quantity;
-                        totalAmount += subtotal;
-                    }
-                });
-            });
-
-            // Update the total order amount
-            const totalAmountElement = document.getElementById('total-amount');
-            totalAmountElement.textContent = `$${totalAmount.toFixed(2)}`;
-        }
-
-        // Function to update the quantity of an order item
-        function updateOrderItemQuantity(menuItemID, newQuantity) {
-            // Find the order item in the order list
-            const orderItem = orderItems.find(item => item.MenuItemID === menuItemID);
-
-            // Update the quantity if it's greater than zero
-            if (newQuantity > 0) {
-                orderItem.Quantity = newQuantity;
-            } else {
-                // Remove the order item if the quantity is zero or less
-                orderItems = orderItems.filter(item => item.MenuItemID !== menuItemID);
-            }
-
-            updateOrderList();
-        }
-
-        // Function to remove an order item
-        function removeOrderItem(menuItemID) {
-            // Remove the order item from the list
-            orderItems = orderItems.filter(item => item.MenuItemID !== menuItemID);
-
-            updateOrderList();
-        }
-
-        // Function to confirm the order
-        function confirmOrder() {
-            const servingTypeElement = document.getElementById('serving-type');
-            const servingType = servingTypeElement.value;
-
-            // Send the order details to the server
-            $.ajax({
-                url: 'confirm_order.php',
-                method: 'POST',
-                data: {
-                    orderItems: JSON.stringify(orderItems),
-                    servingType: servingType,
-                    totalAmount: totalAmount
-                },
-                success: function(response) {
-                    alert('Order confirmed!');
-                    // Reset the order list and total amount
-                    orderItems = [];
-                    totalAmount = 0;
-                    updateOrderList();
-                }
-            });
-        }
-
-        // Function to show the menu (you can define specific behavior here if needed)
-        function showMenu() {
-            // This is a placeholder function, add your implementation here
-        }
-
-        // Function to show orders (you can define specific behavior here if needed)
-        function showOrders() {
-            // This is a placeholder function, add your implementation here
-        }
-
-        // Initialize the menu items when the page loads
-        fetchMenuItems('ValueMeals');
-    </script>
+    <script src="scripts.js"></script>
 
 </body>
 
