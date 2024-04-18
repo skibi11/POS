@@ -1,5 +1,4 @@
 <?php
-
 $host = 'localhost';
 $username = 'root';
 $password = '';
@@ -217,7 +216,7 @@ function getMenuItemPrice($itemID) {
 }
 
 //12. Function to update the status of an order
-function updateOrderStatus($orderID, status) {
+function updateOrderStatus($orderID, $status) {
     $conn = connectDatabase();
 
     $sql = "UPDATE `Order` SET StatusID = (SELECT StatusID FROM OrderStatus WHERE StatusLabel = ?) WHERE OrderID = ?";
@@ -356,5 +355,3 @@ function fetchMenuCategories() {
     $conn->close();
     return categories;
 }
-
-?>
