@@ -53,7 +53,7 @@
                     echo '<p>Price: $' . number_format($item['Price'], 2) . '</p>';
                     
                     // Add to Order button
-                    echo '<button onclick="addToOrder(' . htmlspecialchars($item['ItemID']) . ')">Add to Order</button>';
+                    echo '<button onclick="addOrderItem(' . htmlspecialchars($item['ItemID']) . ')">Add to Order List</button>';
                     
                     echo '</div>';
                 }

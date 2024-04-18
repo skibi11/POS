@@ -37,7 +37,7 @@ function fetchMenuItems($category) {
     return $menuItems;
 }
 
-// 2. Function to add an order item
+// 2. Function to add an order item to order List
 function addOrderItem($orderID, $menuItemID, $quantity) {
     $conn = connectDatabase();
 
@@ -48,6 +48,38 @@ function addOrderItem($orderID, $menuItemID, $quantity) {
     $stmt = $conn->prepare("INSERT INTO orderitem (OrderID, MenuItemID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
     $stmt->bind_param('iiid', $orderID, $menuItemID, $quantity, $subtotal);
     $stmt->execute();
+
+    $stmt->close();
+    $conn->close();
+}
+// Function to add an item to the order
+function addItemToOrder($menuItemID) {
+    $conn = connectDatabase();
+
+    // Check if the item already exists in the order
+    $sql = "SELECT * FROM orderitem WHERE MenuItemID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $menuItemID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        // Item already in order, increase the quantity
+        $orderItem = $result->fetch_assoc();
+        $orderItemID = $orderItem['OrderItemID'];
+        $currentQuantity = $orderItem['Quantity'];
+        $newQuantity = $currentQuantity + 1;
+        updateOrderItemQuantity($orderItemID, $newQuantity);
+    } else {
+        // Item not in order, add a new order item
+        $quantity = 1;
+        $subtotal = getMenuItemPrice($menuItemID) * $quantity;
+
+        $sql = "INSERT INTO orderitem (MenuItemID, Quantity, Subtotal) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('idi', $menuItemID, $quantity, $subtotal);
+        $stmt->execute();
+    }
 
     $stmt->close();
     $conn->close();
@@ -86,39 +118,6 @@ function fetchOrderList() {
 
     $conn->close();
     return $orderList;
-}
-
-// 5. Function to add an item to the order
-function addItemToOrder($menuItemID) {
-    $conn = connectDatabase();
-
-    // Check if the item already exists in the order
-    $sql = "SELECT * FROM orderitem WHERE MenuItemID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $menuItemID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        // Item already in order, increase the quantity
-        $orderItem = $result->fetch_assoc();
-        $orderItemID = $orderItem['OrderItemID'];
-        $currentQuantity = $orderItem['Quantity'];
-        $newQuantity = $currentQuantity + 1;
-        updateOrderItemQuantity($orderItemID, $newQuantity);
-    } else {
-        // Item not in order, add a new order item
-        $quantity = 1;
-        $subtotal = getMenuItemPrice($menuItemID) * $quantity;
-
-        $sql = "INSERT INTO orderitem (MenuItemID, Quantity, Subtotal) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('idi', $menuItemID, $quantity, $subtotal);
-        $stmt->execute();
-    }
-
-    $stmt->close();
-    $conn->close();
 }
 
 // 6. Function to update the quantity of an order item
