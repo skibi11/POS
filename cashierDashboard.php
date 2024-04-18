@@ -32,11 +32,11 @@
             <!-- Category Bar -->
             <div id="category-bar">
                 <!-- Hardcoded categories for demonstration; you can populate them dynamically -->
-                <button onclick="fetchMenuItems('Category1')">ValueMeals</button>
-                <button onclick="fetchMenuItems('Category2')">FlavoredWings</button>
-                <button onclick="fetchMenuItems('Category3')">Desserts</button>
-                <button onclick="fetchMenuItems('Category4')">Coolers</button>
-                <button onclick="fetchMenuItems('Category5')">AddOns</button> 
+                <button onclick="fetchMenuItems('ValueMeals')">Value Meals</button>
+                <button onclick="fetchMenuItems('FlavoredWings')">Flavored Wings</button>
+                <button onclick="fetchMenuItems('Desserts')">Desserts</button>
+                <button onclick="fetchMenuItems('Coolers')">Coolers</button>
+                <button onclick="fetchMenuItems('AddOns')">Add-Ons</button>
             </div>
 
             <!-- Menu Item Cards Grid -->
@@ -46,7 +46,7 @@
                 require_once 'database_functions.php';
 
                 // Default category
-                $defaultCategory = 'Category1';
+                $defaultCategory = 'ValueMeals'; // Update to match your category names
 
                 // Fetch menu items for the default category
                 $menuItems = fetchMenuItems($defaultCategory);
@@ -56,7 +56,7 @@
                     echo '<div class="menu-item-card">';
                     
                     // Display image of the item
-                    echo '<img src="' . htmlspecialchars($item['ImageURL']) . '" alt="' . htmlspecialchars($item['ItemName']) . '">';
+                    echo '<img src="' . htmlspecialchars($item['image']) . '" alt="' . htmlspecialchars($item['ItemName']) . '">';
                     
                     // Display item details (name and price)
                     echo '<h3>' . htmlspecialchars($item['ItemName']) . '</h3>';
@@ -102,5 +102,3 @@
 </body>
 
 </html>
-
-                
