@@ -20,7 +20,7 @@ function connectDatabase() {
 function fetchMenuItems($category) {
     $conn = connectDatabase();
 
-    $stmt = $conn->prepare("SELECT ItemID, ItemName, Price, Category, Image FROM menuitem WHERE Category = ?");
+    $stmt = $conn->prepare("SELECT ItemID, ItemName, Price, Category, `image` FROM menuitem WHERE Category = ?");
     $stmt->bind_param('s', $category);
     $stmt->execute();
 

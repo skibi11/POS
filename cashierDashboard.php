@@ -79,7 +79,7 @@
         // Function to fetch menu items based on the selected category
         function fetchMenuItems(category) {
             $.ajax({
-                url: 'fetch_menu_items.php',
+                url: 'database_functions.php',
                 method: 'POST',
                 data: { category: category },
                 success: function (response) {
