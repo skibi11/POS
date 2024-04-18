@@ -229,7 +229,7 @@ function updateOrderStatus($orderID, $status) {
 }
 
 //13. Function to create a new order for a given user ID and serving type
-function createNewOrder($userID, servingType) {
+function createNewOrder($userID, $servingType) {
     $conn = connectDatabase();
 
     $sql = "INSERT INTO `Order` (UserID, ServingType, TotalAmount, StatusID) VALUES (?, ?, 0, (SELECT StatusID FROM OrderStatus WHERE StatusLabel = 'Pending'))";
@@ -268,7 +268,7 @@ function fetchOrderHistory($orderID) {
 }
 
 //15. Function to add a notification for a specific order
-function addNotification($orderID, message) {
+function addNotification($orderID, $message) {
     $conn = connectDatabase();
 
     $sql = "INSERT INTO Notification (OrderID, Message, NotificationDate, StatusID) VALUES (?, ?, NOW(), (SELECT StatusID FROM OrderStatus WHERE StatusLabel = 'Pending'))";
