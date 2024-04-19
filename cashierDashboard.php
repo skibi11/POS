@@ -38,23 +38,22 @@
 
                 // Default category
                 $defaultCategory = 'ValueMeal';
-                $selectedCategory = '';
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (isset($_POST['ValueMeal'])) {
                         // Call the PHP function for Value Meals category
-                        $selectedCategory = 'ValueMeal';
+                        $_SESSION["selectedCategory"] = 'ValueMeal';
                     } elseif (isset($_POST['FlavoredWings'])) {
                         // Call the PHP function for Flavored Wings category
-                        $selectedCategory = 'FlavoredWings';
+                        $_SESSION["selectedCategory"] = 'FlavoredWings';
                     } elseif (isset($_POST['Desserts'])) {
                         // Call the PHP function for Desserts category
-                        $selectedCategory = 'Desserts';
+                        $_SESSION["selectedCategory"] = 'Desserts';
                     } elseif (isset($_POST['Coolers'])) {
                         // Call the PHP function for Coolers category
-                        $selectedCategory = 'Coolers';
+                        $_SESSION["selectedCategory"] = 'Coolers';
                     } elseif (isset($_POST['AddOns'])) {
                         // Call the PHP function for Add-Ons category
-                        $selectedCategory = 'AddOns';
+                        $_SESSION["selectedCategory"] = 'AddOns';
                     }
                 }
                 // Check if the form was submitted for adding an item to the order
@@ -71,13 +70,12 @@
                 }
 
                 // Fetch menu items for the default category
-                if($selectedCategory === ''){
-                    $menuItems = fetchMenuItems($defaultCategory);
-
-                }
-                else{
-                    $menuItems = fetchMenuItems($selectedCategory);
-                }
+                $selectedCategory = $_SESSION['selectedCategory'] ?? '';
+    if ($selectedCategory === '') {
+        $menuItems = fetchMenuItems($defaultCategory);
+    } else {
+        $menuItems = fetchMenuItems($selectedCategory);
+    }
 
                 // Loop through the menu items and generate HTML for each card
                 foreach ($menuItems as $item) {

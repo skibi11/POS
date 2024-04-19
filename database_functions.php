@@ -1,4 +1,5 @@
 <?php
+session_start();
 $host = 'localhost';
 $username = 'root';
 $password = '';
@@ -394,6 +395,11 @@ function fetchOrderTotalAmount() {
     $conn->close();
 
     return $totalQuantity;
+}
+
+function logOut(){
+
+    session_abort();
 }
 
 //Function to fetch distinct menu categories from the database
