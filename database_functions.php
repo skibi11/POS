@@ -426,8 +426,6 @@ function fetchUserDetails($userID) {
     return $userDetails;
 }
 
-
-
 //Function to fetch distinct menu categories from the database
 function fetchMenuCategories() {
     $conn = connectDatabase();
