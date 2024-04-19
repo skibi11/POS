@@ -397,9 +397,32 @@ function fetchOrderTotalAmount() {
     return $totalQuantity;
 }
 
-function logOut(){
+// Function to log out the user
+function logout() {
+    // Start the session if it hasn't been started already
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-    session_abort();
+    // Clear all session data
+    $_SESSION = array();
+
+    //Clear the session cookies
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+
+
+    // Destroy the session
+    session_destroy();
+
+    // Redirect the user to login page 
+    header("Location: loginPage.php"); 
+    exit(); 
 }
 
 //Function to fetch distinct menu categories from the database
