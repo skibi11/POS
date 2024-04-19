@@ -82,7 +82,6 @@
                     echo '<h3>' . htmlspecialchars($item['ItemName']) . '</h3>';
                     echo '<p>Price: $' . number_format($item['Price'], 2) . '</p>';
                     
-                    // Add to Order button
                     // Add to Order button in a form
                     echo '<form method="post">';
                     echo '<input type="hidden" name="item_id" value="' . htmlspecialchars($item['ItemID']) . '">';
