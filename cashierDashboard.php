@@ -71,11 +71,11 @@
 
                 // Fetch menu items for the default category
                 $selectedCategory = $_SESSION['selectedCategory'] ?? '';
-    if ($selectedCategory === '') {
-        $menuItems = fetchMenuItems($defaultCategory);
-    } else {
-        $menuItems = fetchMenuItems($selectedCategory);
-    }
+                if ($selectedCategory === '') {
+                    $menuItems = fetchMenuItems($defaultCategory);
+                } else {
+                    $menuItems = fetchMenuItems($selectedCategory);
+                }
 
                 // Loop through the menu items and generate HTML for each card
                 foreach ($menuItems as $item) {
@@ -176,6 +176,14 @@
         </div>
 
     </div>
-
+    <script>
+    var loginPageButtonContainer = document.getElementById("logout-button");
+        if (loginPageButtonContainer) {
+            loginPageButtonContainer.addEventListener("click", function (e) {
+                <?php logout() ?>
+                window.location.href = "./LoginPage.php";
+            });
+        }
+    </script>
 </body>
 </html>

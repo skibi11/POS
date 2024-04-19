@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: {$_SERVER['PHP_SELF']}");
             exit();
         }
-        $stmt->close();
+        //$stmt->close();
     } else {
         $_SESSION['error'] = "Error preparing statement: " . $conn->error;
         header("Location: {$_SERVER['PHP_SELF']}");
