@@ -37,23 +37,24 @@
                 require_once 'database_functions.php';
 
                 // Default category
-                $defaultCategory = '';
+                $defaultCategory = 'ValueMeal';
+                $selectedCategory = '';
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (isset($_POST['ValueMeal'])) {
                         // Call the PHP function for Value Meals category
-                        $defaultCategory = 'ValueMeal';
+                        $selectedCategory = 'ValueMeal';
                     } elseif (isset($_POST['FlavoredWings'])) {
                         // Call the PHP function for Flavored Wings category
-                        $defaultCategory = 'FlavoredWings';
+                        $selectedCategory = 'FlavoredWings';
                     } elseif (isset($_POST['Desserts'])) {
                         // Call the PHP function for Desserts category
-                        $defaultCategory = 'Desserts';
+                        $selectedCategory = 'Desserts';
                     } elseif (isset($_POST['Coolers'])) {
                         // Call the PHP function for Coolers category
-                        $defaultCategory = 'Coolers';
+                        $selectedCategory = 'Coolers';
                     } elseif (isset($_POST['AddOns'])) {
                         // Call the PHP function for Add-Ons category
-                        $defaultCategory = 'AddOns';
+                        $selectedCategory = 'AddOns';
                     }
                 }
                 // Check if the form was submitted for adding an item to the order
@@ -70,7 +71,13 @@
                 }
 
                 // Fetch menu items for the default category
-                $menuItems = fetchMenuItems($defaultCategory);
+                if($selectedCategory === ''){
+                    $menuItems = fetchMenuItems($defaultCategory);
+
+                }
+                else{
+                    $menuItems = fetchMenuItems($selectedCategory);
+                }
 
                 // Loop through the menu items and generate HTML for each card
                 foreach ($menuItems as $item) {
