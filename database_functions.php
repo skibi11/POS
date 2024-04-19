@@ -17,6 +17,34 @@ function connectDatabase() {
     return $conn;
 }
 
+// Function to log out the user
+function logout() {
+    // Start the session if it hasn't been started already
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // Clear all session data
+    $_SESSION = array();
+
+    //Clear the session cookies
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+
+
+    // Destroy the session
+    session_destroy();
+
+    // Redirect the user to login page 
+    header("Location: loginPage.php"); 
+    exit(); 
+}
+
 //Function to fetch menu items based on the selected category
 function fetchMenuItems($category) {
     $conn = connectDatabase();
@@ -38,21 +66,6 @@ function fetchMenuItems($category) {
     return $menuItems;
 }
 
-//Function to add an order item to order
-function addOrderItem($orderID, $menuItemID, $quantity) {
-    $conn = connectDatabase();
-
-    // Fetch the price of the menu item
-    $menuItem = fetchMenuItemById($menuItemID);
-    $subtotal = $menuItem['Price'] * $quantity;
-
-    $stmt = $conn->prepare("INSERT INTO orderitem (OrderID, ItemID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('iiid', $orderID, $menuItemID, $quantity, $subtotal);
-    $stmt->execute();
-
-    $stmt->close();
-    $conn->close();
-}
 //Function to add an item to the order list
 function addItemToOrder($menuItemID) {
     $conn = connectDatabase();
@@ -224,7 +237,42 @@ function getMenuItemPrice($menuItemID) {
     return $price;
 }
 
-//Function to fetch order details
+//Function to fetch the total amount of a group of orders
+function fetchOrderTotalAmount() {
+    $conn = connectDatabase();
+    $totalQuantity = 0;
+    $sql = "SELECT * FROM `orderItem`";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    while ($orderDetails = $result->fetch_assoc()) {
+        $totalQuantity += $orderDetails['Subtotal'];
+    }
+    $stmt->close();
+    $conn->close();
+
+    return $totalQuantity;
+}
+
+//Function to add a group of orderitem (an orderlist) to order database
+function addOrderItem($orderID, $menuItemID, $quantity) {
+    $conn = connectDatabase();
+
+    // Fetch the price of the menu item
+    $menuItem = fetchMenuItemById($menuItemID);
+    $subtotal = $menuItem['Price'] * $quantity;
+
+    $stmt = $conn->prepare("INSERT INTO orderitem (OrderID, ItemID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param('iiid', $orderID, $menuItemID, $quantity, $subtotal);
+    $stmt->execute();
+
+    $stmt->close();
+    $conn->close();
+}
+
+//Function to fetch order details from the database
 function fetchOrderDetails($orderID) {
     $conn = connectDatabase();
 
@@ -378,52 +426,7 @@ function fetchUserDetails($userID) {
     return $userDetails;
 }
 
-//Function to fetch the total amount of a group of orders
-function fetchOrderTotalAmount() {
-    $conn = connectDatabase();
-    $totalQuantity = 0;
-    $sql = "SELECT * FROM `orderItem`";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute();
 
-    $result = $stmt->get_result();
-
-    while ($orderDetails = $result->fetch_assoc()) {
-        $totalQuantity += $orderDetails['Subtotal'];
-    }
-    $stmt->close();
-    $conn->close();
-
-    return $totalQuantity;
-}
-
-// Function to log out the user
-function logout() {
-    // Start the session if it hasn't been started already
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    // Clear all session data
-    $_SESSION = array();
-
-    //Clear the session cookies
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
-            $params["path"], $params["domain"],
-            $params["secure"], $params["httponly"]
-        );
-    }
-
-
-    // Destroy the session
-    session_destroy();
-
-    // Redirect the user to login page 
-    header("Location: loginPage.php"); 
-    exit(); 
-}
 
 //Function to fetch distinct menu categories from the database
 function fetchMenuCategories() {
