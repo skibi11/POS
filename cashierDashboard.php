@@ -37,7 +37,7 @@
                 require_once 'database_functions.php';
 
                 // Default category
-                $defaultCategory = 'ValueMeal';
+                $defaultCategory = '';
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (isset($_POST['ValueMeal'])) {
                         // Call the PHP function for Value Meals category
@@ -116,39 +116,41 @@
                 <!-- The order list will be populated dynamically using JavaScript -->
                 <h2>Order List</h2>
                     <ul>
-                        <?php
-                        // Include the PHP file with your functions
-                        require_once 'database_functions.php';
+                    <?php
+                // Include the PHP file with your functions
+                require_once 'database_functions.php';
 
-                        // Call your PHP function to get the order items
-                        $orderItems = fetchOrderList(); // Replace getOrderItems() with your actual function name
-                        
-                        // Loop through the order items and display them in the list
-                        foreach ($orderItems as $item) {
-                            echo '<li>';
-                            echo 'Item ID: ' . htmlspecialchars($item['ItemID']) . '<br>';
-                            echo 'Quantity: ' . htmlspecialchars($item['Quantity']) . '<br>';
-                            echo 'Subtotal: $' . number_format($item['Subtotal'], 2) . '<br>';
-                            echo '<form method="post">';
-                            echo '<input type="hidden" name="item_id" value="' . htmlspecialchars($item['ItemID']) . '">';
-                            echo '<input type="submit" name="decrease" value="-">';
-                            echo '<input type="submit" name="increase" value="+">';
-                            echo '</form>';;
-                        }
-                        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                            // Retrieve the item ID from the POST data
-                            $itemID = htmlspecialchars($_POST['item_id'], ENT_QUOTES, 'UTF-8');
-                            
-                            // Determine the action and call the appropriate function
-                            if ($_POST['increase']) {
-                                // Call the function to increase the quantity
-                                increaseQuantity($itemID);
-                            } elseif ($_POST['decrease']) {
-                                // Call the function to decrease the quantity
-                                decreaseQuantity($itemID);
-                            }
-                        }
-                        ?>
+                // Call your PHP function to get the order items
+                $orderItems = fetchOrderList(); // Replace getOrderItems() with your actual function name
+
+                // Loop through the order items and display them in the list
+                foreach ($orderItems as $item) {
+                    echo '<li>';
+                    echo 'Item ID: ' . htmlspecialchars($item['ItemID']) . '<br>';
+                    echo 'Quantity: ' . htmlspecialchars($item['Quantity']) . '<br>';
+                    echo 'Subtotal: $' . number_format($item['Subtotal'], 2) . '<br>';
+                    echo '<form method="post">';
+                    echo '<input type="hidden" name="item_id" value="' . htmlspecialchars($item['ItemID']) . '">';
+                    echo '<input type="submit" name="decrease" value="-">';
+                    echo '<input type="submit" name="increase" value="+">';
+                    echo '</form>';
+                    ;
+                }
+
+                if (isset($_POST['increase']) || isset($_POST['decrease'])) {
+                    // Retrieve the item ID from the POST data
+                    $itemID = htmlspecialchars($_POST['item_id'], ENT_QUOTES, 'UTF-8');
+
+                    // Determine the action and call the appropriate function
+                    if ( isset($_POST['increase'])) {
+                        // Call the function to increase the quantity
+                        increaseQuantity($itemID);
+                    } elseif (isset($_POST['decrease'])) {
+                        // Call the function to decrease the quantity
+                        decreaseQuantity($itemID);
+                    }
+                }
+                ?>
                 </ul>
             </div>
 
@@ -163,7 +165,7 @@
 
             <!-- Total Order Amount and Confirm Button -->
             <div id="order-summary">
-                <p>Total Order Amount: <span id="total-amount">$0.00</span></p>
+                <p>Total Order Amount: <span id="total-amount"><?php echo fetchOrderTotalAmount() ?></span></p>
                 <button id="confirm-button">Confirm Order</button>
             </div>
         </div>

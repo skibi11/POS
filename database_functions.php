@@ -129,6 +129,7 @@ function updateOrderItemQuantity($orderItemID, $quantity) {
     $stmt->bind_param('ii', $quantity, $orderItemID);
     $stmt->execute();
 
+    header("Location: cashierDashboard.php");
     $stmt->close();
     $conn->close();
 }
@@ -186,7 +187,7 @@ function decreaseQuantity($itemID) {
             removeOrderItem($orderItemID);
         }
     }
-
+    header("Location: cashierDashboard.php");
     $stmt->close();
     $conn->close();
 }
@@ -376,22 +377,23 @@ function fetchUserDetails($userID) {
     return $userDetails;
 }
 
-//Function to fetch the total amount of a specific order
-function fetchOrderTotalAmount($orderID) {
+//Function to fetch the total amount of a group of orders
+function fetchOrderTotalAmount() {
     $conn = connectDatabase();
-
-    $sql = "SELECT TotalAmount FROM `orderr` WHERE OrderID = ?";
+    $totalQuantity = 0;
+    $sql = "SELECT * FROM `orderItem`";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $orderID);
     $stmt->execute();
 
     $result = $stmt->get_result();
-    $orderDetails = $result->fetch_assoc();
 
+    while ($orderDetails = $result->fetch_assoc()) {
+        $totalQuantity += $orderDetails['Subtotal'];
+    }
     $stmt->close();
     $conn->close();
 
-    return $orderDetails['TotalAmount'];
+    return $totalQuantity;
 }
 
 //Function to fetch distinct menu categories from the database
