@@ -133,6 +133,64 @@ function updateOrderItemQuantity($orderItemID, $quantity) {
     $conn->close();
 }
 
+function increaseQuantity($itemID) {
+    $conn = connectDatabase();
+
+    // Fetch the current quantity of the item in the order
+    $sql = "SELECT OrderItemID, Quantity FROM orderitem WHERE ItemID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $itemID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $orderItemID = $row['OrderItemID'];
+        $currentQuantity = $row['Quantity'];
+
+        // Increase the quantity by 1
+        $newQuantity = $currentQuantity + 1;
+
+        // Update the order item quantity and subtotal
+        updateOrderItemQuantity($orderItemID, $newQuantity);
+    }
+
+    $stmt->close();
+    $conn->close();
+}
+
+// Function to decrease the quantity of an order item
+function decreaseQuantity($itemID) {
+    $conn = connectDatabase();
+
+    // Fetch the current quantity of the item in the order
+    $sql = "SELECT OrderItemID, Quantity FROM orderitem WHERE ItemID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $itemID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $orderItemID = $row['OrderItemID'];
+        $currentQuantity = $row['Quantity'];
+
+        // Decrease the quantity by 1
+        $newQuantity = $currentQuantity - 1;
+
+        if ($newQuantity > 0) {
+            // Update the order item quantity and subtotal if quantity is still positive
+            updateOrderItemQuantity($orderItemID, $newQuantity);
+        } else {
+            // If the quantity is zero or negative, remove the order item
+            removeOrderItem($orderItemID);
+        }
+    }
+
+    $stmt->close();
+    $conn->close();
+}
+
 //Function to remove an order item
 function removeOrderItem($orderItemID) {
     $conn = connectDatabase();
@@ -144,6 +202,24 @@ function removeOrderItem($orderItemID) {
 
     $stmt->close();
     $conn->close();
+}
+
+// Function to get the price of a menu item by its ID
+function getMenuItemPrice($menuItemID) {
+    $conn = connectDatabase();
+
+    $sql = "SELECT Price FROM menuitem WHERE ItemID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $menuItemID);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $price = $result->fetch_assoc()['Price'];
+
+    $stmt->close();
+    $conn->close();
+
+    return $price;
 }
 
 //Function to fetch order details
@@ -177,7 +253,7 @@ function confirmOrder($orderID, $servingType, $totalAmount) {
     $conn->close();
 }
 
-// 10. Function to fetch serving type options from the database
+// Function to fetch serving type options from the database
 function fetchServingTypeOptions() {
     $conn = connectDatabase();
 
@@ -195,25 +271,7 @@ function fetchServingTypeOptions() {
     return $servingTypes;
 }
 
-// 11. Function to get the price of a menu item by its ID
-function getMenuItemPrice($menuItemID) {
-    $conn = connectDatabase();
-
-    $sql = "SELECT Price FROM menuitem WHERE ItemID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $menuItemID);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $price = $result->fetch_assoc()['Price'];
-
-    $stmt->close();
-    $conn->close();
-
-    return $price;
-}
-
-// 12. Function to update the status of an order
+// Function to update the status of an order
 function updateOrderStatus($orderID, $status) {
     $conn = connectDatabase();
 
@@ -226,7 +284,7 @@ function updateOrderStatus($orderID, $status) {
     $conn->close();
 }
 
-// 13. Function to create a new order for a given user ID and serving type
+// Function to create a new order for a given user ID and serving type
 function createNewOrder($userID, $servingType) {
     $conn = connectDatabase();
 
@@ -243,7 +301,7 @@ function createNewOrder($userID, $servingType) {
     return $orderID;
 }
 
-// 14. Function to fetch the history of changes for a specific order
+// Function to fetch the history of changes for a specific order
 function fetchOrderHistory($orderID) {
     $conn = connectDatabase();
 
@@ -265,7 +323,7 @@ function fetchOrderHistory($orderID) {
     return $history;
 }
 
-// 15. Function to add a notification for a specific order
+//Function to add a notification for a specific order
 function addNotification($orderID, $message) {
     $conn = connectDatabase();
 
@@ -278,7 +336,7 @@ function addNotification($orderID, $message) {
     $conn->close();
 }
 
-// 16. Function to fetch notifications for a specific order
+//Function to fetch notifications for a specific order
 function fetchNotifications($orderID) {
     $conn = connectDatabase();
 
@@ -300,7 +358,7 @@ function fetchNotifications($orderID) {
     return $notifications;
 }
 
-// 17. Function to fetch details of a specific user
+//Function to fetch details of a specific user
 function fetchUserDetails($userID) {
     $conn = connectDatabase();
 
@@ -318,7 +376,7 @@ function fetchUserDetails($userID) {
     return $userDetails;
 }
 
-// 18. Function to fetch the total amount of a specific order
+//Function to fetch the total amount of a specific order
 function fetchOrderTotalAmount($orderID) {
     $conn = connectDatabase();
 
@@ -336,7 +394,7 @@ function fetchOrderTotalAmount($orderID) {
     return $orderDetails['TotalAmount'];
 }
 
-// 19. Function to fetch distinct menu categories from the database
+//Function to fetch distinct menu categories from the database
 function fetchMenuCategories() {
     $conn = connectDatabase();
 

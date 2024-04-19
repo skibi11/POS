@@ -119,6 +119,20 @@
                         <?php
                         // Include the PHP file with your functions
                         require_once 'database_functions.php';
+                        
+                        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+                            // Retrieve the item ID from the POST data
+                            $itemID = htmlspecialchars($_POST['item_id'], ENT_QUOTES, 'UTF-8');
+                            
+                            // Determine the action and call the appropriate function
+                            if ($_POST['action'] === 'increase') {
+                                // Call the function to increase the quantity
+                                increaseQuantity($itemID);
+                            } elseif ($_POST['action'] === 'decrease') {
+                                // Call the function to decrease the quantity
+                                decreaseQuantity($itemID);
+                            }
+                        }
 
                         // Call your PHP function to get the order items
                         $orderItems = fetchOrderList(); // Replace getOrderItems() with your actual function name
@@ -129,9 +143,11 @@
                             echo 'Item ID: ' . htmlspecialchars($item['ItemID']) . '<br>';
                             echo 'Quantity: ' . htmlspecialchars($item['Quantity']) . '<br>';
                             echo 'Subtotal: $' . number_format($item['Subtotal'], 2) . '<br>';
-                            echo '<button onclick="increaseQuantity(' . htmlspecialchars($item['ItemID']) . ')">-</button>';
-                            echo '<button onclick="decreaseQuantity(' . htmlspecialchars($item['ItemID']) . ')">+</button>';
-                            echo '</li>';
+                            echo '<form method="post">';
+                            echo '<input type="hidden" name="item_id" value="' . htmlspecialchars($item['ItemID']) . '">';
+                            echo '<input type="submit" name="action" value="-">';
+                            echo '<input type="submit" name="action" value="+">';
+                            echo '</form>';;
                         }
                         ?>
                 </ul>
