@@ -118,7 +118,7 @@ $conn->close();
                         <button type="submit" class="login" id="loginContainer">
                             <b class="create-an-account2">Login</b>
                         </button>
-                        <div class="createacc" id="createaccContainer">
+                        <div class="createacc" id="signupPageContainer">
                             <b class="create-an-account3">Create an Account</b>
                         </div>
                     </div>
@@ -133,10 +133,10 @@ $conn->close();
         </section>
     </div>
     <script>
-        var createaccContainer = document.getElementById("createaccContainer");
-        if (createaccContainer) {
-            createaccContainer.addEventListener("click", function (e) {
-                window.location.href = "./index.php";
+        var signupPageContainer = document.getElementById("signupPageContainer");
+        if (signupPageContainer) {
+            signupPageContainer.addEventListener("click", function (e) {
+                window.location.href = "./signupPage.php";
             });
         }
     </script>
