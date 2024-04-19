@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: {$_SERVER['PHP_SELF']}");
             exit();
         }
-        //$stmt->close();
+    //$stmt->close();
     } else {
         $_SESSION['error'] = "Error preparing statement: " . $conn->error;
         header("Location: {$_SERVER['PHP_SELF']}");
@@ -91,12 +91,14 @@ $conn->close();
         <?php
         // Display error or success messages from session
         if (isset($_SESSION['error'])) {
-            echo '<script>' . htmlspecialchars($_SESSION['error']) . '</script>';
+            $text =  htmlspecialchars($_SESSION['error']);
+            echo "<script>alert('$text')</script>";
             unset($_SESSION['error']);
         }
 
         if (isset($_SESSION['success'])) {
-            echo '<script>' . htmlspecialchars($_SESSION['success']) . '</script>';
+            $text = htmlspecialchars($_SESSION['success']);
+            echo "<script>alert('$text')</script>";
             unset($_SESSION['success']);
         }?>
         <div class="label">

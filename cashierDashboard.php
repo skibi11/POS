@@ -18,11 +18,45 @@
 
         <!-- Left Sidebar -->
         <div id="left-sidebar">
+            <?php
+            // Include your database functions file
+            require_once 'database_functions.php';
+
+            // Handle form submissions
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (isset($_POST['menu'])) {
+                    header("Location: ./cashierDashboard.php");
+
+                } elseif (isset($_POST['orders'])) {
+                    // Call your PHP function for the orders button
+
+                } elseif (isset($_POST['logout'])) {
+                    logout();
+                    echo "User has been logged out.";
+                    header("Location: ./loginPage.php");
+                }
+            }
+            ?>
             <nav>
                 <ul>
-                    <li><button id="menu-button">Menu</button></li>
-                    <li><button id="orders-button">Orders</button></li>
-                    <li><button id="logout-button">Logout</button></li>
+                    <!-- Menu Button -->
+                    <li>
+                        <form method="post">
+                            <input type="submit" name="menu" value="Menu" />
+                        </form>
+                    </li>
+                    <!-- Orders Button -->
+                    <li>
+                        <form method="post">
+                            <input type="submit" name="orders" value="Orders" />
+                        </form>
+                    </li>
+                    <!-- Logout Button -->
+                    <li>
+                        <form method="post">
+                            <input type="submit" name="logout" value="Logout" />
+                        </form>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -176,14 +210,6 @@
         </div>
 
     </div>
-    <script>
-    var loginPageButtonContainer = document.getElementById("logout-button");
-        if (loginPageButtonContainer) {
-            loginPageButtonContainer.addEventListener("click", function (e) {
-                <?php logout() ?>
-                window.location.href = "./LoginPage.php";
-            });
-        }
-    </script>
+
 </body>
 </html>

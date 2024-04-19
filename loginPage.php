@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Password matches, log the user in
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
-
                 // Redirect the user to their account dashboard or another protected page
                 header("Location: ./cashierDashboard.php");
+
                 exit();
             } else {
                 // Password does not match
@@ -46,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // No user found with the given username
             $_SESSION['error'] = "invalid username/password.";
         }
-        
         $stmt->close();
     } else {
         $_SESSION['error'] = "error preparing statement: " . $conn->error;
@@ -87,7 +86,8 @@ $conn->close();
         <?php
         // Display error messages from the session
         if (isset($_SESSION['error'])) {
-            echo '<script>' . htmlspecialchars($_SESSION['error']) . '</script>';
+            $text =  htmlspecialchars($_SESSION['error']);
+            echo "<script>alert('$text')</script>";
             unset($_SESSION['error']);
         }
         ?>
@@ -128,7 +128,7 @@ $conn->close();
               class="chickenamorpic-icon"
               loading="lazy"
               alt=""
-              src="./public/chickenamorpic@2x.png"
+              src="./includes/chickenamorpic@2x.png"
             />
         </section>
     </div>
