@@ -56,12 +56,17 @@
                         $defaultCategory = 'AddOns';
                     }
                 }
+                // Check if the form was submitted for adding an item to the order
                 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addToOrder'])) {
                     // Retrieve the item ID from the POST data
                     $itemID = htmlspecialchars($_POST['item_id'], ENT_QUOTES, 'UTF-8');
                     
                     // Call your PHP function to add the item to the order
                     addItemToOrder($itemID);
+
+                    // Redirect to the same page without form data to avoid resubmission on refresh
+                    header('Location: ' . $_SERVER['PHP_SELF']);
+                    exit;
                 }
 
                 // Fetch menu items for the default category
@@ -72,7 +77,6 @@
                     echo '<div class="menu-item-card">';
                     
                     // // Display image of the item
-                    // echo '<img src="' . htmlspecialchars($item['Image']) . '" alt="' . htmlspecialchars($item['ItemName']) . '">';
 
                     // Use the null coalescing operator (??) to provide a default image URL if 'Image' key is missing
                     $imageUrl = $item['Image'] ?? 'path_to_default_image.jpg';
@@ -82,6 +86,7 @@
                     echo '<h3>' . htmlspecialchars($item['ItemName']) . '</h3>';
                     echo '<p>Price: $' . number_format($item['Price'], 2) . '</p>';
                     
+                    // Add to Order button
                     // Add to Order button in a form
                     echo '<form method="post">';
                     echo '<input type="hidden" name="item_id" value="' . htmlspecialchars($item['ItemID']) . '">';
@@ -109,6 +114,27 @@
             <!-- Order List -->
             <div id="order-list">
                 <!-- The order list will be populated dynamically using JavaScript -->
+                <h2>Order List</h2>
+                    <ul>
+                        <?php
+                        // Include the PHP file with your functions
+                        require_once 'database_functions.php';
+
+                        // Call your PHP function to get the order items
+                        $orderItems = fetchOrderList(); // Replace getOrderItems() with your actual function name
+                        
+                        // Loop through the order items and display them in the list
+                        foreach ($orderItems as $item) {
+                            echo '<li>';
+                            echo 'Item ID: ' . htmlspecialchars($item['ItemID']) . '<br>';
+                            echo 'Quantity: ' . htmlspecialchars($item['Quantity']) . '<br>';
+                            echo 'Subtotal: $' . number_format($item['Subtotal'], 2) . '<br>';
+                            echo '<button onclick="increaseQuantity(' . htmlspecialchars($item['ItemID']) . ')">-</button>';
+                            echo '<button onclick="decreaseQuantity(' . htmlspecialchars($item['ItemID']) . ')">+</button>';
+                            echo '</li>';
+                        }
+                        ?>
+                </ul>
             </div>
 
             <!-- Serving Type Options -->
