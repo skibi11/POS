@@ -31,9 +31,15 @@
                     // Call your PHP function for the orders button
 
                 } elseif (isset($_POST['logout'])) {
-                    logout();
-                    echo "User has been logged out.";
-                    header("Location: ./loginPage.php");
+                    //echo "<script> window.confirm('');</script>";
+                    echo "<script> 
+                        if (confirm('Are you sure to logout?')){
+                            window.location.href = './LoginPage.php'; 
+                            logout();
+                            exit(); }
+                        else{ 
+                            window.location.href = './cashierDashboard.php';}
+                        </script>";
                 }
             }
             ?>
