@@ -32,25 +32,6 @@ function logout() {
             $params["path"], $params["domain"],
             $params["secure"], $params["httponly"]);
     }
-
-
-    // Clear all session data
-    $_SESSION = array();
-
-    //Clear the session cookies
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000,
-            $params["path"], $params["domain"],
-            $params["secure"], $params["httponly"]
-        );
-    }
-    // Destroy the session
-    session_destroy();
-
-    // Redirect the user to login page 
-    header("Location: loginPage.php"); 
-    exit(); 
 }
 
 //Function to fetch menu items based on the selected category

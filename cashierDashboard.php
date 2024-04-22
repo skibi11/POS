@@ -33,9 +33,9 @@
                 } elseif (isset($_POST['logout'])) {
                     echo "<script> 
                         if (confirm('Are you sure to logout?')){
-                            window.location.href = './LoginPage.php'; 
+                            window.location.href = './LoginPage.php';
                             logout();
-                            exit(); }
+                            exit();} 
                         else{ 
                             window.location.href = './cashierDashboard.php';}
                         </script>";
