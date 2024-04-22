@@ -32,9 +32,26 @@ function logout() {
             $params["path"], $params["domain"],
             $params["secure"], $params["httponly"]);
     }
-}
+
+
+    // Clear all session data
+    $_SESSION = array();
+
+    //Clear the session cookies
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
     // Destroy the session
     session_destroy();
+
+    // Redirect the user to login page 
+    header("Location: loginPage.php"); 
+    exit(); 
+}
 
 //Function to fetch menu items based on the selected category
 function fetchMenuItems($category) {
@@ -232,7 +249,7 @@ function getMenuItemPrice($menuItemID) {
 function fetchOrderTotalAmount() {
     $conn = connectDatabase();
     $totalQuantity = 0;
-    $sql = "SELECT * FROM `orderItem`";
+    $sql = "SELECT * FROM orderItem";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
 
@@ -267,7 +284,7 @@ function addOrderItem($orderID, $menuItemID, $quantity) {
 function fetchOrderDetails($orderID) {
     $conn = connectDatabase();
 
-    $sql = "SELECT * FROM `orderr` WHERE OrderID = ?";
+    $sql = "SELECT * FROM orderr WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $orderID);
     $stmt->execute();
@@ -285,7 +302,7 @@ function fetchOrderDetails($orderID) {
 function confirmOrder($orderID, $servingType, $totalAmount) {
     $conn = connectDatabase();
 
-    $sql = "UPDATE `orderr` SET ServingType = ?, TotalAmount = ?, StatusID = (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Confirmed') WHERE OrderID = ?";
+    $sql = "UPDATE orderr SET ServingType = ?, TotalAmount = ?, StatusID = (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Confirmed') WHERE OrderID = ?";
     $stmt=$conn->prepare($sql);
     $stmt->bind_param('sdi', $servingType, $totalAmount, $orderID);
     $stmt->execute();
@@ -298,7 +315,7 @@ function confirmOrder($orderID, $servingType, $totalAmount) {
 function fetchServingTypeOptions() {
     $conn = connectDatabase();
 
-    $sql = "SELECT DISTINCT ServingType FROM `orderr`";
+    $sql = "SELECT DISTINCT ServingType FROM orderr";
     $result = $conn->query($sql);
 
     $servingTypes = [];
@@ -316,7 +333,7 @@ function fetchServingTypeOptions() {
 function updateOrderStatus($orderID, $status) {
     $conn = connectDatabase();
 
-    $sql = "UPDATE `orderr` SET StatusID = (SELECT StatusID FROM orderstatus WHERE StatusLabel = ?) WHERE OrderID = ?";
+    $sql = "UPDATE orderr SET StatusID = (SELECT StatusID FROM orderstatus WHERE StatusLabel = ?) WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('si', $status, $orderID);
     $stmt->execute();
@@ -329,7 +346,7 @@ function updateOrderStatus($orderID, $status) {
 function createNewOrder($userID, $servingType) {
     $conn = connectDatabase();
 
-    $sql = "INSERT INTO `orderr` (UserID, ServingType, TotalAmount, StatusID) VALUES (?, ?, 0, (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Pending'))";
+    $sql = "INSERT INTO orderr (UserID, ServingType, TotalAmount, StatusID) VALUES (?, ?, 0, (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Pending'))";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('is', $userID, $servingType);
     $stmt->execute();
@@ -368,7 +385,7 @@ function fetchOrderHistory($orderID) {
 function addNotification($orderID, $message) {
     $conn = connectDatabase();
 
-    $sql = "INSERT INTO `notification` (OrderID, Message, NotificationDate, StatusID) VALUES (?, ?, NOW(), (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Pending'))";
+    $sql = "INSERT INTO notification (OrderID, Message, NotificationDate, StatusID) VALUES (?, ?, NOW(), (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Pending'))";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('is', $orderID, $message);
     $stmt->execute();
@@ -381,7 +398,7 @@ function addNotification($orderID, $message) {
 function fetchNotifications($orderID) {
     $conn = connectDatabase();
 
-    $sql = "SELECT * FROM `notification` WHERE OrderID = ?";
+    $sql = "SELECT * FROM notification WHERE OrderID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('i', $orderID);
     $stmt->execute();

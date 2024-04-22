@@ -31,7 +31,6 @@
                     // Call your PHP function for the orders button
 
                 } elseif (isset($_POST['logout'])) {
-                    //echo "<script> window.confirm('');</script>";
                     echo "<script> 
                         if (confirm('Are you sure to logout?')){
                             window.location.href = './LoginPage.php'; 
