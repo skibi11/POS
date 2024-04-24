@@ -255,6 +255,18 @@ function clearOrderList() {
     // Clear the order list stored in the session
     $_SESSION['orderList'] = [];
 }
+// Function to clear the order items table
+function clearOrderItems() {
+    $conn = connectDatabase();
+
+    // SQL query to delete all records from the orderitem table
+    $sql = "DELETE FROM orderitem"; // Corrected table name
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+
+    $stmt->close();
+    $conn->close();
+}
 
 // Function to generate order number
 function generateOrderNumber() {
@@ -268,13 +280,11 @@ function generateOrderNumber() {
 }
 
 // Function to insert values order items into orderr table
-function insertOrderItemsIntoOrderr($orderItems) {
+function insertOrderItemsIntoOrderr($orderItems, $orderNumber, $servingType) {
     // Get additional attributes
     $orderDate = date('Y-m-d H:i:s'); // Current date and time
-    $servingType = 1; // Dine In = 1 as Default serving type
     $status = 'Ongoing'; // Default status
     $userID = $_SESSION['user_ID'] ?? ''; // Assuming UserID is stored in the session
-    $orderNumber = generateOrderNumber(); // Generate a unique order number
 
     // Insert each item into orderr
     $totalAmount = 0; // Initialize totalAmount
@@ -308,7 +318,7 @@ function addOrderItem($orderDate, $servingType, $status, $userID, $orderNumber, 
     $conn->close();
 }
 
-// Function to insert total amount into payment table
+
 // Function to insert total amount into payment table
 function insertTotalAmountIntoPayment($totalAmount, $orderNumber) {
     $conn = connectDatabase();
@@ -337,6 +347,15 @@ function insertTotalAmountIntoPayment($totalAmount, $orderNumber) {
         $stmt->execute();
     }
 
+    // Clear the order list and orderItems table
+    clearOrderList();
+    clearOrderItems();
+    header('Location: cashierDashboard.php');
+    
+    // Generate a new OrderNumber for the next order
+    $newOrderNumber = generateOrderNumber();
+    
     $stmt->close();
     $conn->close();
+    return $newOrderNumber;
 }

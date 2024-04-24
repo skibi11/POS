@@ -128,7 +128,7 @@
                     
                     // Display item details (name and price)
                     echo '<h3>' . htmlspecialchars($item['ItemName']) . '</h3>';
-                    echo '<p>Price: $' . number_format($item['Price'], 2) . '</p>';
+                    echo '<p>Price: ₱' . number_format($item['Price'], 2) . '</p>';
                     
                     // Add to Order button
                     // Add to Order button in a form
@@ -172,7 +172,7 @@
                     echo '<li>';
                     echo 'Item ID: ' . htmlspecialchars($item['ItemID']) . '<br>';
                     echo 'Quantity: ' . htmlspecialchars($item['Quantity']) . '<br>';
-                    echo 'Subtotal: $' . number_format($item['Subtotal'], 2) . '<br>';
+                    echo 'Subtotal: ₱' . number_format($item['Subtotal'], 2) . '<br>';
                     echo '<form method="post">';
                     echo '<input type="hidden" name="item_id" value="' . htmlspecialchars($item['ItemID']) . '">';
                     echo '<input type="submit" name="decrease" value="-">';
@@ -201,25 +201,28 @@
             <!-- Serving Type Options -->
             <?php
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm-order'])) {
-                // Retrieve the selected serving type and order number from the form
+                // Generate a new order number
+                $orderNumber = generateOrderNumber();
+
+                // Retrieve the selected serving type from the form
                 $servingType = $_POST['serving-type'];
 
-                // Insert the order items into the orderr table
-                insertOrderItemsIntoOrderr($orderItems);       
+                // Insert the order items into the orderr table using the new order number
+                insertOrderItemsIntoOrderr($orderItems, $orderNumber, $servingType);
             }
             ?>
             <form id="serving-form" method="post">
                 <div id="serving-options">
                     <label for="serving-type">Serving Type:</label>
                     <select id="serving-type" name="serving-type">
-                        <option value = "1" >Dine-in</option>
-                        <option value= "0" >Take-out</option>
+                        <option value = 1 >Dine-in</option>
+                        <option value= 0 >Take-out</option>
                     </select>
                 </div>
                 
                 <!-- Total Order Amount and Confirm Button -->
                 <div id="order-summary">
-                    <p>Total Order Amount: <span id="total-amount"><?php echo fetchOrderTotalAmount() ?></span></p>
+                    <p>Total Order Amount: <span id="total-amount"><?php echo '₱' . fetchOrderTotalAmount() ?></span></p>
                     <input type="submit" value="Confirm Order" name="confirm-order">
                 </div>
             </form>
