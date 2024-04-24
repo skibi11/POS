@@ -245,190 +245,98 @@ function fetchOrderTotalAmount() {
     return $totalQuantity;
 }
 
-//Function to add a group of orderitem (an orderlist) to order database
-function addOrderItem($orderID, $menuItemID, $quantity) {
-    $conn = connectDatabase();
-
-    // Fetch the price of the menu item
-    $menuItem = fetchMenuItemById($menuItemID);
-    $subtotal = $menuItem['Price'] * $quantity;
-
-    $stmt = $conn->prepare("INSERT INTO orderitem (OrderID, ItemID, Quantity, Subtotal) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('iiid', $orderID, $menuItemID, $quantity, $subtotal);
-    $stmt->execute();
-
-    $stmt->close();
-    $conn->close();
+// Function to clear the order list
+function clearOrderList() {
+    // Start the session if it hasn't been started already
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    // Clear the order list stored in the session
+    $_SESSION['orderList'] = [];
 }
 
-//Function to fetch order details from the database
-function fetchOrderDetails($orderID) {
+// Function to generate order number
+function generateOrderNumber() {
+    // Implement your logic to generate a unique order number
+    // Example: Concatenate timestamp and a random number
+    $timestamp = date('YmdHis'); // Current timestamp
+    $random = mt_rand(1000, 9999); // Generate a random 4-digit number
+    $orderNumber = $timestamp . $random; // Concatenate timestamp and random number
+
+    return $orderNumber;
+}
+
+// Function to insert values order items into orderr table
+function insertOrderItemsIntoOrderr($orderItems) {
+    // Get additional attributes
+    $orderDate = date('Y-m-d H:i:s'); // Current date and time
+    $servingType = 1; // Dine In = 1 as Default serving type
+    $status = 'Ongoing'; // Default status
+    $userID = $_SESSION['user_ID'] ?? ''; // Assuming UserID is stored in the session
+    $orderNumber = generateOrderNumber(); // Generate a unique order number
+
+    // Insert each item into orderr
+    $totalAmount = 0; // Initialize totalAmount
+    foreach ($orderItems as $item) {
+        $itemID = $item['ItemID'];
+        $quantity = $item['Quantity'];
+        $subtotal = $item['Subtotal'];
+
+        // Insert into orderr
+        addOrderItem($orderDate, $servingType, $status, $userID, $orderNumber, $itemID, $quantity, $subtotal);
+
+        // Update total amount
+        $totalAmount += $subtotal;
+    }
+
+    // Insert total amount into payment table
+    insertTotalAmountIntoPayment($totalAmount, $orderNumber);
+}
+
+// Function to insert an item into orderr
+function addOrderItem($orderDate, $servingType, $status, $userID, $orderNumber, $itemID, $quantity, $subtotal) {
     $conn = connectDatabase();
 
-    $sql = "SELECT * FROM orderr WHERE OrderID = ?";
+    $sql = "INSERT INTO orderr (OrderDate, ServingType, Status, UserID, OrderNumber, ItemID, Quantity, Subtotal) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $orderID);
+    $stmt->bind_param('sisiiiid', $orderDate, $servingType, $status, $userID, $orderNumber, $itemID, $quantity, $subtotal);
     $stmt->execute();
 
+    $stmt->close();
+    $conn->close();
+}
+
+// Function to insert total amount into payment table
+// Function to insert total amount into payment table
+function insertTotalAmountIntoPayment($totalAmount, $orderNumber) {
+    $conn = connectDatabase();
+
+    // Get the current date and time
+    $paymentDate = date('Y-m-d H:i:s');
+
+    // Check if the order number already exists in the payment table
+    $sql = "SELECT OrderNumber FROM payment WHERE OrderNumber = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $orderNumber);
+    $stmt->execute();
     $result = $stmt->get_result();
-    $orderDetails = $result->fetch_assoc();
 
-    $stmt->close();
-    $conn->close();
-
-    return $orderDetails;
-}
-
-//Function to confirm the order with serving type and total amount
-function confirmOrder($orderID, $servingType, $totalAmount) {
-    $conn = connectDatabase();
-
-    $sql = "UPDATE orderr SET ServingType = ?, TotalAmount = ?, StatusID = (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Confirmed') WHERE OrderID = ?";
-    $stmt=$conn->prepare($sql);
-    $stmt->bind_param('sdi', $servingType, $totalAmount, $orderID);
-    $stmt->execute();
-
-    $stmt->close();
-    $conn->close();
-}
-
-// Function to fetch serving type options from the database
-function fetchServingTypeOptions() {
-    $conn = connectDatabase();
-
-    $sql = "SELECT DISTINCT ServingType FROM orderr";
-    $result = $conn->query($sql);
-
-    $servingTypes = [];
+    // If the order number exists, update the existing row
     if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $servingTypes[] = $row['ServingType'];
-        }
-    }
-
-    $conn->close();
-    return $servingTypes;
-}
-
-// Function to update the status of an order
-function updateOrderStatus($orderID, $status) {
-    $conn = connectDatabase();
-
-    $sql = "UPDATE orderr SET StatusID = (SELECT StatusID FROM orderstatus WHERE StatusLabel = ?) WHERE OrderID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('si', $status, $orderID);
-    $stmt->execute();
-
-    $stmt->close();
-    $conn->close();
-}
-
-// Function to create a new order for a given user ID and serving type
-function createNewOrder($userID, $servingType) {
-    $conn = connectDatabase();
-
-    $sql = "INSERT INTO orderr (UserID, ServingType, TotalAmount, StatusID) VALUES (?, ?, 0, (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Pending'))";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('is', $userID, $servingType);
-    $stmt->execute();
-
-    $orderID = $stmt->insert_id;
-
-    $stmt->close();
-    $conn->close();
-
-    return $orderID;
-}
-
-// Function to fetch the history of changes for a specific order
-function fetchOrderHistory($orderID) {
-    $conn = connectDatabase();
-
-    $sql = "SELECT * FROM orderhistory JOIN orderstatus ON orderhistory.StatusID = orderstatus.StatusID WHERE OrderID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $orderID);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $history = [];
-
-    while ($row = $result->fetch_assoc()) {
-        $history[] = $row;
+        $sql = "UPDATE payment SET TotalAmount = ?, PaymentDate = ? WHERE OrderNumber = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('dsi', $totalAmount, $paymentDate, $orderNumber);
+        $stmt->execute();
+    } else {
+        // If the order number doesn't exist, insert a new row
+        $sql = "INSERT INTO payment (TotalAmount, PaymentDate, OrderNumber) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('dsi', $totalAmount, $paymentDate, $orderNumber);
+        $stmt->execute();
     }
 
     $stmt->close();
     $conn->close();
-
-    return $history;
-}
-
-//Function to add a notification for a specific order
-function addNotification($orderID, $message) {
-    $conn = connectDatabase();
-
-    $sql = "INSERT INTO notification (OrderID, Message, NotificationDate, StatusID) VALUES (?, ?, NOW(), (SELECT StatusID FROM orderstatus WHERE StatusLabel = 'Pending'))";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('is', $orderID, $message);
-    $stmt->execute();
-
-    $stmt->close();
-    $conn->close();
-}
-
-//Function to fetch notifications for a specific order
-function fetchNotifications($orderID) {
-    $conn = connectDatabase();
-
-    $sql = "SELECT * FROM notification WHERE OrderID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $orderID);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $notifications = [];
-
-    while ($row = $result->fetch_assoc()) {
-        $notifications[] = $row;
-    }
-
-    $stmt->close();
-    $conn->close();
-
-    return $notifications;
-}
-
-//Function to fetch details of a specific user
-function fetchUserDetails($userID) {
-    $conn = connectDatabase();
-
-    $sql = "SELECT * FROM user WHERE UserID = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param('i', $userID);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $userDetails = $result->fetch_assoc();
-
-    $stmt->close();
-    $conn->close();
-
-    return $userDetails;
-}
-
-//Function to fetch distinct menu categories from the database
-function fetchMenuCategories() {
-    $conn = connectDatabase();
-
-    $sql = "SELECT DISTINCT Category FROM menuitem";
-    $result = $conn->query($sql);
-
-    $categories = [];
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $categories[] = $row['Category'];
-        }
-    }
-
-    $conn->close();
-    return $categories;
 }

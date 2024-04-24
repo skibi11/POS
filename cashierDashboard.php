@@ -199,19 +199,30 @@
             </div>
 
             <!-- Serving Type Options -->
-            <div id="serving-options">
-                <label for="serving-type">Serving Type:</label>
-                <select id="serving-type">
-                    <option value="dine-in">Dine-in</option>
-                    <option value="take-out">Take-out</option>
-                </select>
-            </div>
+            <?php
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm-order'])) {
+                // Retrieve the selected serving type and order number from the form
+                $servingType = $_POST['serving-type'];
 
-            <!-- Total Order Amount and Confirm Button -->
-            <div id="order-summary">
-                <p>Total Order Amount: <span id="total-amount"><?php echo fetchOrderTotalAmount() ?></span></p>
-                <button id="confirm-button">Confirm Order</button>
-            </div>
+                // Insert the order items into the orderr table
+                insertOrderItemsIntoOrderr($orderItems);       
+            }
+            ?>
+            <form id="serving-form" method="post">
+                <div id="serving-options">
+                    <label for="serving-type">Serving Type:</label>
+                    <select id="serving-type" name="serving-type">
+                        <option value = "1" >Dine-in</option>
+                        <option value= "0" >Take-out</option>
+                    </select>
+                </div>
+                
+                <!-- Total Order Amount and Confirm Button -->
+                <div id="order-summary">
+                    <p>Total Order Amount: <span id="total-amount"><?php echo fetchOrderTotalAmount() ?></span></p>
+                    <input type="submit" value="Confirm Order" name="confirm-order">
+                </div>
+            </form>
         </div>
 
     </div>

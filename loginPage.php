@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Verify the password
             if (password_verify($password, $user['password'])) {
                 // Password matches, log the user in
-                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_ID'] = $user['UserID'];
                 $_SESSION['username'] = $user['username'];
                 // Redirect the user to their account dashboard or another protected page
                 header("Location: ./cashierDashboard.php");

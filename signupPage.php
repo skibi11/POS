@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("sss", $email, $username, $hashed_password);
         if ($stmt->execute()) {
             $_SESSION['success'] = "Account created successfully! Please log in.";
-            header("Location: {$_SERVER['PHP_SELF']}");
+            header("Location: ./loginPage.php");
             exit();
         } else {
             $_SESSION['error'] = "Error: " . $stmt->error;
